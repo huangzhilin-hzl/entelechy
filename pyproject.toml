@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "entelechy-kernels"
+version = "0.1.0"
+description = "CuTe DSL-first NVIDIA kernels for LLM inference."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Entelechy contributors" }]
+dependencies = [
+  "nvidia-cutlass-dsl==4.7.0",
+  "torch",
+]
+
+[project.optional-dependencies]
+cu13 = ["nvidia-cutlass-dsl[cu13]==4.7.0"]
+dev = [
+  "pre-commit",
+  "pytest",
+  "ruff",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["entelechy*"]
+
+[tool.pytest.ini_options]
+markers = [
+  "cuda: requires an NVIDIA GPU",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = [
+  "E731",  # CuTe DSL commonly uses compile-time lambdas.
+  "E741",  # CuTe layout code commonly uses I/O/L symbols.
+]
