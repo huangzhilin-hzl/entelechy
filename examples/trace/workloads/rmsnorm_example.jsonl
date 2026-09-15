@@ -1,0 +1,4 @@
+{"definition": "rmsnorm_example", "workload": {"uuid": "rmsnorm_example-0", "axes": {"B": 8}, "inputs": {"weight": {"type": "random"}, "x": {"type": "random"}, "eps": {"type": "scalar", "value": 1e-06}}}, "solution": null, "evaluation": null}
+{"definition": "rmsnorm_example", "workload": {"uuid": "rmsnorm_example-1", "axes": {"B": 16}, "inputs": {"weight": {"type": "random"}, "x": {"type": "random"}, "eps": {"type": "scalar", "value": 1e-05}}}, "solution": null, "evaluation": null}
+{"definition": "rmsnorm_example", "workload": {"uuid": "rmsnorm_example-2", "axes": {"B": 17}, "inputs": {"weight": {"type": "random"}, "x": {"type": "random"}, "eps": {"type": "scalar", "value": 1e-06}}}, "solution": null, "evaluation": null}
+{"definition": "rmsnorm_example", "workload": {"uuid": "rmsnorm_example-3", "axes": {"B": 33}, "inputs": {"weight": {"type": "random"}, "x": {"type": "random"}, "eps": {"type": "scalar", "value": 1e-05}}}, "solution": null, "evaluation": null}

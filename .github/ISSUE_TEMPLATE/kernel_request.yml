@@ -1,0 +1,29 @@
+name: Kernel or optimization request
+description: Propose a workload, baseline, or missing compiler capability.
+body:
+  - type: textarea
+    id: workload
+    attributes:
+      label: FlashInfer Trace definition and workloads
+      description: Describe the operation, shapes, dtype, layouts, state or aliasing behavior, and numerical tolerance.
+    validations:
+      required: true
+  - type: textarea
+    id: target
+    attributes:
+      label: Target GPU and baseline
+      description: Name the GPU, baseline implementation and revision, and how to reproduce it.
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation and evidence
+      description: Explain the bottleneck. If measurements exist, include absolute latency, timing scope, tested shapes, and regressions.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Available validation
+      description: Describe the correctness reference, public inputs, hardware access, and integration requirements.

@@ -4,34 +4,64 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "entelechy-kernels"
-version = "0.1.0"
-description = "CuTe DSL-first NVIDIA kernels for LLM inference."
+version = "0.0.1"
+description = "Agent-driven IR and CUDA compiler evolution from native FlashInfer Trace."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [{ name = "Entelechy contributors" }]
-dependencies = [
-  "nvidia-cutlass-dsl==4.7.0",
-  "torch",
+dependencies = ["jsonschema>=4.23,<5", "PyYAML>=6"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 
+[project.urls]
+Repository = "https://github.com/huangzhilin-hzl/entelechy"
+Issues = "https://github.com/huangzhilin-hzl/entelechy/issues"
+Documentation = "https://github.com/huangzhilin-hzl/entelechy/blob/main/README.md"
+
+[project.scripts]
+entelechy = "entelechy.cli:main"
+
 [project.optional-dependencies]
-cu13 = ["nvidia-cutlass-dsl[cu13]==4.7.0"]
+gpu = ["torch", "ninja"]
+trace = [
+  "flashinfer-bench @ git+https://github.com/flashinfer-ai/flashinfer-bench.git@40e6ca7844b514eb4b1c7edba6d6a7377df57870",
+  "ninja",
+  "cupti-python>=13",
+]
 dev = [
   "pre-commit",
   "pytest",
-  "ruff",
+  "ruff==0.16.7",
+  "build",
+  "twine>=6",
+  "pydantic>=2,<3",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["entelechy*"]
 
+[tool.setuptools.package-data]
+entelechy = ["schemas/*.json", "schemas/*.md"]
+
 [tool.pytest.ini_options]
 markers = [
   "cuda: requires an NVIDIA GPU",
 ]
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
@@ -39,7 +69,5 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
-ignore = [
-  "E731",  # CuTe DSL commonly uses compile-time lambdas.
-  "E741",  # CuTe layout code commonly uses I/O/L symbols.
-]
+# Timing adapters use concise callable closures.
+ignore = ["E731"]
