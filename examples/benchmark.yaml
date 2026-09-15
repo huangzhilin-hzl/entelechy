@@ -1,0 +1,5 @@
+warmup_runs: 10
+iterations: 50
+num_trials: 8
+rtol: 0.01
+atol: 0.00002

@@ -1,0 +1,4 @@
+{"definition": "softmax_example", "workload": {"uuid": "softmax_example-0", "axes": {"B": 8}, "inputs": {"x": {"type": "random"}}}, "solution": null, "evaluation": null}
+{"definition": "softmax_example", "workload": {"uuid": "softmax_example-1", "axes": {"B": 16}, "inputs": {"x": {"type": "random"}}}, "solution": null, "evaluation": null}
+{"definition": "softmax_example", "workload": {"uuid": "softmax_example-2", "axes": {"B": 17}, "inputs": {"x": {"type": "random"}}}, "solution": null, "evaluation": null}
+{"definition": "softmax_example", "workload": {"uuid": "softmax_example-3", "axes": {"B": 33}, "inputs": {"x": {"type": "random"}}}, "solution": null, "evaluation": null}

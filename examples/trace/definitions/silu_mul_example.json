@@ -1,0 +1,40 @@
+{
+  "name": "silu_mul_example",
+  "op_type": "silu_mul",
+  "axes": {
+    "B": {
+      "type": "var"
+    },
+    "H": {
+      "type": "const",
+      "value": 64
+    },
+    "D": {
+      "type": "const",
+      "value": 128
+    }
+  },
+  "inputs": {
+    "x": {
+      "shape": [
+        "B",
+        "D"
+      ],
+      "dtype": "float32"
+    }
+  },
+  "outputs": {
+    "y": {
+      "shape": [
+        "B",
+        "H"
+      ],
+      "dtype": "float32"
+    }
+  },
+  "reference": "import torch\n\ndef run(x):\n    gate, value = x.float().chunk(2, dim=-1)\n    return (gate * torch.sigmoid(gate) * value).to(x.dtype)\n",
+  "tags": [
+    "status:draft"
+  ],
+  "description": "Small Entelechy-authored FlashInfer Trace example; no measured speedup claim."
+}

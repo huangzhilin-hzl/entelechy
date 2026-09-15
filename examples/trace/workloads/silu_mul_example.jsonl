@@ -1,0 +1,4 @@
+{"definition": "silu_mul_example", "workload": {"uuid": "silu_mul_example-0", "axes": {"B": 8}, "inputs": {"x": {"type": "random"}}}, "solution": null, "evaluation": null}
+{"definition": "silu_mul_example", "workload": {"uuid": "silu_mul_example-1", "axes": {"B": 16}, "inputs": {"x": {"type": "random"}}}, "solution": null, "evaluation": null}
+{"definition": "silu_mul_example", "workload": {"uuid": "silu_mul_example-2", "axes": {"B": 17}, "inputs": {"x": {"type": "random"}}}, "solution": null, "evaluation": null}
+{"definition": "silu_mul_example", "workload": {"uuid": "silu_mul_example-3", "axes": {"B": 33}, "inputs": {"x": {"type": "random"}}}, "solution": null, "evaluation": null}

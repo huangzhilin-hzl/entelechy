@@ -1,0 +1,19 @@
+{
+  "name": "silu_mul_example_torch_baseline",
+  "definition": "silu_mul_example",
+  "author": "baseline",
+  "spec": {
+    "language": "python",
+    "target_hardware": [
+      "cuda"
+    ],
+    "entry_point": "main.py::run",
+    "destination_passing_style": false
+  },
+  "sources": [
+    {
+      "path": "main.py",
+      "content": "import torch\n\ndef run(x):\n    gate, value = x.chunk(2, dim=-1)\n    return torch.nn.functional.silu(gate) * value\n"
+    }
+  ]
+}

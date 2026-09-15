@@ -1,0 +1,19 @@
+{
+  "name": "softmax_example_torch_baseline",
+  "definition": "softmax_example",
+  "author": "baseline",
+  "spec": {
+    "language": "python",
+    "target_hardware": [
+      "cuda"
+    ],
+    "entry_point": "main.py::run",
+    "destination_passing_style": false
+  },
+  "sources": [
+    {
+      "path": "main.py",
+      "content": "import torch\n\ndef run(x):\n    return torch.softmax(x, dim=-1)\n"
+    }
+  ]
+}

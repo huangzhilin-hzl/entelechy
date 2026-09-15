@@ -9,3 +9,5 @@ build/
 dist/
 *.ncu-rep
 *.nsys-rep
+experiments/
+exports/

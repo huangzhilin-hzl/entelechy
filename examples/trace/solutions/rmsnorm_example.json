@@ -1,0 +1,19 @@
+{
+  "name": "rmsnorm_example_torch_baseline",
+  "definition": "rmsnorm_example",
+  "author": "baseline",
+  "spec": {
+    "language": "python",
+    "target_hardware": [
+      "cuda"
+    ],
+    "entry_point": "main.py::run",
+    "destination_passing_style": false
+  },
+  "sources": [
+    {
+      "path": "main.py",
+      "content": "import torch\n\ndef run(weight, x, eps):\n    return torch.nn.functional.rms_norm(x, (x.shape[-1],), weight, eps)\n"
+    }
+  ]
+}

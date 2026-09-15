@@ -1,0 +1,36 @@
+{
+  "name": "softmax_example",
+  "op_type": "softmax",
+  "axes": {
+    "B": {
+      "type": "var"
+    },
+    "H": {
+      "type": "const",
+      "value": 64
+    }
+  },
+  "inputs": {
+    "x": {
+      "shape": [
+        "B",
+        "H"
+      ],
+      "dtype": "float32"
+    }
+  },
+  "outputs": {
+    "y": {
+      "shape": [
+        "B",
+        "H"
+      ],
+      "dtype": "float32"
+    }
+  },
+  "reference": "import torch\n\ndef run(x):\n    shifted = x.float() - x.float().amax(-1, keepdim=True)\n    numerator = shifted.exp()\n    return (numerator / numerator.sum(-1, keepdim=True)).to(x.dtype)\n",
+  "tags": [
+    "status:draft"
+  ],
+  "description": "Small Entelechy-authored FlashInfer Trace example; no measured speedup claim."
+}

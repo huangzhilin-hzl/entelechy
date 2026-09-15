@@ -1,0 +1,46 @@
+{
+  "name": "rmsnorm_example",
+  "op_type": "rmsnorm",
+  "axes": {
+    "B": {
+      "type": "var"
+    },
+    "H": {
+      "type": "const",
+      "value": 64
+    }
+  },
+  "inputs": {
+    "weight": {
+      "shape": [
+        "H"
+      ],
+      "dtype": "float32"
+    },
+    "x": {
+      "shape": [
+        "B",
+        "H"
+      ],
+      "dtype": "float32"
+    },
+    "eps": {
+      "shape": null,
+      "dtype": "float32"
+    }
+  },
+  "outputs": {
+    "y": {
+      "shape": [
+        "B",
+        "H"
+      ],
+      "dtype": "float32"
+    }
+  },
+  "reference": "import torch\n\ndef run(weight, x, eps):\n    scale = torch.rsqrt((x.float() * x.float()).mean(-1, keepdim=True) + eps)\n    return ((x.float() * scale) * weight.float()).to(x.dtype)\n",
+  "tags": [
+    "status:draft"
+  ],
+  "description": "Small Entelechy-authored FlashInfer Trace example; no measured speedup claim."
+}

@@ -1,0 +1,999 @@
+{
+  "upstream_revision": "40e6ca7844b514eb4b1c7edba6d6a7377df57870",
+  "license": "Apache-2.0",
+  "schemas": {
+    "Definition": {
+      "$defs": {
+        "AxisConst": {
+          "description": "Constant axis with a fixed value.\n\nA constant axis represents a dimension that has a fixed, compile-time known value.\nThis is useful for dimensions that don't vary across different instances of the\nsame kernel definition, such as embedding dimensions or hidden layer sizes.",
+          "properties": {
+            "type": {
+              "const": "const",
+              "default": "const",
+              "description": "The type identifier for constant axes.",
+              "title": "Type",
+              "type": "string"
+            },
+            "value": {
+              "description": "The constant integer value of this axis dimension.",
+              "minimum": 0,
+              "title": "Value",
+              "type": "integer"
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "An optional human-readable description explaining the purpose of this axis.",
+              "title": "Description"
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "title": "AxisConst",
+          "type": "object"
+        },
+        "AxisVar": {
+          "description": "Variable axis that can be specified at runtime.\n\nA variable axis represents a dimension whose value is determined at runtime\nbased on the actual input data. Its value will be bound to the input tensor\ndimension at runtime.",
+          "properties": {
+            "type": {
+              "const": "var",
+              "default": "var",
+              "title": "Type",
+              "type": "string"
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Description"
+            }
+          },
+          "title": "AxisVar",
+          "type": "object"
+        },
+        "DType": {
+          "description": "Supported data types for tensors.\n\nEnumeration of all data types that can be used in tensor specifications.\nIncludes both floating-point and integer types commonly used in machine\nlearning and high-performance computing applications.",
+          "enum": [
+            "float32",
+            "float16",
+            "bfloat16",
+            "float8_e4m3fn",
+            "float8_e5m2",
+            "float4_e2m1",
+            "int64",
+            "int32",
+            "int16",
+            "int8",
+            "bool"
+          ],
+          "title": "DType",
+          "type": "string"
+        },
+        "TensorSpec": {
+          "description": "Specification for a tensor including shape and data type, to use as input or output of a\nkernel.\n\nThis includes the symbolic shape (referencing defined axes) and the data type.\nScalars are represented with a None shape.",
+          "properties": {
+            "shape": {
+              "anyOf": [
+                {
+                  "items": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "List of axis names defining the tensor shape. None for scalar values.",
+              "title": "Shape"
+            },
+            "dtype": {
+              "$ref": "#/$defs/DType",
+              "description": "The data type of all elements in this tensor."
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "An optional human-readable description of this tensor's purpose and usage.",
+              "title": "Description"
+            }
+          },
+          "required": [
+            "shape",
+            "dtype"
+          ],
+          "title": "TensorSpec",
+          "type": "object"
+        }
+      },
+      "description": "Complete definition of a computational workload.\n\nA Definition provides a formal, machine-readable specification for a computational\nworkload. It defines the tensor formats, dimension semantics, and computational\nlogic through a reference implementation. This serves as the single source of\ntruth for kernel development and optimization.",
+      "properties": {
+        "name": {
+          "description": "A unique, human-readable name for the kernel definition.",
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "op_type": {
+          "description": "The general compute category (e.g., 'gemm', 'gqa_ragged', 'mla_paged', 'moe').",
+          "minLength": 1,
+          "title": "Op Type",
+          "type": "string"
+        },
+        "axes": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AxisConst"
+              },
+              {
+                "$ref": "#/$defs/AxisVar"
+              }
+            ]
+          },
+          "description": "Dictionary of symbolic dimensions used in tensor shapes. The axes will be bound to the\ninput tensor dimensions at runtime.",
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Axes",
+          "type": "object"
+        },
+        "inputs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/TensorSpec"
+          },
+          "description": "Named input tensors required by this kernel. The order of inputs is preserved as the\nkernel's interface.",
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Inputs",
+          "type": "object"
+        },
+        "outputs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/TensorSpec"
+          },
+          "description": "Named output tensors produced by this kernel. The names of the output must not overlap\nwith the names of the inputs. The order of outputs is preserved as the kernel's interface.",
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Outputs",
+          "type": "object"
+        },
+        "reference": {
+          "description": "Reference implementation code. It defines the compute logic of the kernel. Must be a valid\nPython code with a 'run' function that takes the input tensors and returns the output tensors.",
+          "minLength": 1,
+          "title": "Reference",
+          "type": "string"
+        },
+        "tags": {
+          "description": "Optional list of tags for grouping and filtering kernels. It's used in the FlashInfer-Bench\nwebsite.",
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional human-readable description of the kernel's purpose.",
+          "title": "Description"
+        },
+        "constraints": {
+          "description": "Optional list of constraint expressions describing relationships between axes.",
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Constraints",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "op_type",
+        "axes",
+        "inputs",
+        "outputs",
+        "reference"
+      ],
+      "title": "Definition",
+      "type": "object"
+    },
+    "Trace": {
+      "$defs": {
+        "Correctness": {
+          "description": "Correctness metrics from numerical evaluation.\n\nContains error measurements comparing the solution output against\na reference implementation to assess numerical accuracy.",
+          "properties": {
+            "max_relative_error": {
+              "default": 0.0,
+              "description": "Maximum relative error observed across all output elements.",
+              "title": "Max Relative Error",
+              "type": "number"
+            },
+            "max_absolute_error": {
+              "default": 0.0,
+              "description": "Maximum absolute error observed across all output elements.",
+              "title": "Max Absolute Error",
+              "type": "number"
+            },
+            "extra": {
+              "anyOf": [
+                {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Extra metrics for correctness evaluation.",
+              "title": "Extra"
+            }
+          },
+          "title": "Correctness",
+          "type": "object"
+        },
+        "Environment": {
+          "description": "Environment information from evaluation execution.\n\nRecords the hardware and software environment details from when\nthe evaluation was performed, enabling reproducibility analysis.",
+          "properties": {
+            "hardware": {
+              "description": "Hardware identifier where the evaluation was performed (e.g., 'NVIDIA_H100').",
+              "minLength": 1,
+              "title": "Hardware",
+              "type": "string"
+            },
+            "libs": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "description": "Dictionary of library names to version strings used during evaluation.",
+              "title": "Libs",
+              "type": "object"
+            }
+          },
+          "required": [
+            "hardware"
+          ],
+          "title": "Environment",
+          "type": "object"
+        },
+        "Evaluation": {
+          "description": "Complete evaluation result for a solution on a workload.\n\nRecords the full outcome of benchmarking a solution implementation\nagainst a specific workload, including status, metrics, and environment.",
+          "properties": {
+            "status": {
+              "$ref": "#/$defs/EvaluationStatus",
+              "description": "The overall evaluation status indicating success or failure mode."
+            },
+            "environment": {
+              "$ref": "#/$defs/Environment",
+              "description": "Environment details where the evaluation was performed."
+            },
+            "timestamp": {
+              "description": "Timestamp when the evaluation was performed (ISO format recommended).",
+              "minLength": 1,
+              "title": "Timestamp",
+              "type": "string"
+            },
+            "log": {
+              "default": "",
+              "description": "Captured stdout/stderr from the evaluation run.",
+              "title": "Log",
+              "type": "string"
+            },
+            "correctness": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Correctness"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Correctness metrics (present for PASSED and INCORRECT_NUMERICAL status)."
+            },
+            "performance": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Performance"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Performance metrics (present only for PASSED status)."
+            }
+          },
+          "required": [
+            "status",
+            "environment",
+            "timestamp"
+          ],
+          "title": "Evaluation",
+          "type": "object"
+        },
+        "EvaluationStatus": {
+          "description": "Status codes for evaluation results.\n\nEnumeration of all possible outcomes when evaluating a solution\nagainst a workload, covering success and various failure modes.",
+          "enum": [
+            "PASSED",
+            "INCORRECT_SHAPE",
+            "INCORRECT_NUMERICAL",
+            "INCORRECT_DTYPE",
+            "RUNTIME_ERROR",
+            "COMPILE_ERROR",
+            "TIMEOUT"
+          ],
+          "title": "EvaluationStatus",
+          "type": "string"
+        },
+        "Performance": {
+          "description": "Performance metrics from timing evaluation.\n\nContains timing measurements and performance comparisons from\nbenchmarking the solution against reference implementations.",
+          "properties": {
+            "latency_ms": {
+              "default": 0.0,
+              "description": "Solution execution latency in milliseconds.",
+              "minimum": 0.0,
+              "title": "Latency Ms",
+              "type": "number"
+            },
+            "reference_latency_ms": {
+              "default": 0.0,
+              "description": "Reference implementation latency in milliseconds for comparison.",
+              "minimum": 0.0,
+              "title": "Reference Latency Ms",
+              "type": "number"
+            },
+            "speedup_factor": {
+              "default": 0.0,
+              "description": "Performance speedup factor compared to reference (reference_time / solution_time).",
+              "minimum": 0.0,
+              "title": "Speedup Factor",
+              "type": "number"
+            }
+          },
+          "title": "Performance",
+          "type": "object"
+        },
+        "RandomInput": {
+          "description": "Random input generation descriptor.\n\nRepresents a specification for generating random tensor input data\nduring workload execution and benchmarking.",
+          "properties": {
+            "type": {
+              "const": "random",
+              "default": "random",
+              "description": "The input type identifier for random data generation.",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "title": "RandomInput",
+          "type": "object"
+        },
+        "SafetensorsInput": {
+          "description": "Input specification for data loaded from safetensors files.\n\nRepresents tensor data that will be loaded from a safetensors file\nusing a specific tensor key within that file.",
+          "properties": {
+            "type": {
+              "const": "safetensors",
+              "default": "safetensors",
+              "description": "The input type identifier for safetensors data.",
+              "title": "Type",
+              "type": "string"
+            },
+            "path": {
+              "description": "Path to the safetensors file containing the tensor data. The path is relative to the root\npath of the TraceSet.",
+              "minLength": 1,
+              "title": "Path",
+              "type": "string"
+            },
+            "tensor_key": {
+              "description": "Key identifier for the specific tensor within the safetensors file.",
+              "minLength": 1,
+              "title": "Tensor Key",
+              "type": "string"
+            }
+          },
+          "required": [
+            "path",
+            "tensor_key"
+          ],
+          "title": "SafetensorsInput",
+          "type": "object"
+        },
+        "ScalarInput": {
+          "description": "Scalar literal input specification.\n\nRepresents a scalar value (integer, float, or boolean) that will be\nused as a direct input parameter to the computational workload.",
+          "properties": {
+            "type": {
+              "const": "scalar",
+              "default": "scalar",
+              "description": "The input type identifier for scalar values.",
+              "title": "Type",
+              "type": "string"
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ],
+              "description": "The scalar value to be used as input. Must be int, float, or bool.",
+              "title": "Value"
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "title": "ScalarInput",
+          "type": "object"
+        },
+        "Workload": {
+          "description": "Concrete workload configuration for benchmarking.\n\nDefines a specific instance of a computational workload with concrete\nvalues for all variable axes and specifications for all input data.\nThis represents an executable configuration that can be benchmarked.",
+          "properties": {
+            "axes": {
+              "additionalProperties": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "description": "Dictionary mapping axis names to their concrete integer values. All values must be\npositive.",
+              "title": "Axes",
+              "type": "object"
+            },
+            "inputs": {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/RandomInput"
+                  },
+                  {
+                    "$ref": "#/$defs/SafetensorsInput"
+                  },
+                  {
+                    "$ref": "#/$defs/ScalarInput"
+                  }
+                ]
+              },
+              "description": "Dictionary mapping input names to their data specifications.",
+              "title": "Inputs",
+              "type": "object"
+            },
+            "uuid": {
+              "description": "Unique identifier for this specific workload configuration.",
+              "minLength": 1,
+              "title": "Uuid",
+              "type": "string"
+            }
+          },
+          "required": [
+            "axes",
+            "inputs",
+            "uuid"
+          ],
+          "title": "Workload",
+          "type": "object"
+        }
+      },
+      "description": "Complete trace linking a solution to a definition with evaluation results.\n\nA Trace represents the complete record of benchmarking a specific solution\nimplementation against a specific computational workload definition. It includes\nthe workload configuration and evaluation results.\n\nSpecial case: A \"workload trace\" contains only definition and workload fields\n(with solution and evaluation set to None), representing a workload configuration\nwithout an actual benchmark execution.",
+      "properties": {
+        "definition": {
+          "description": "Name of the Definition that specifies the computational workload.",
+          "minLength": 1,
+          "title": "Definition",
+          "type": "string"
+        },
+        "workload": {
+          "$ref": "#/$defs/Workload",
+          "description": "Concrete workload configuration with specific axis values and inputs."
+        },
+        "solution": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Name of the Solution implementation (None for workload-only traces).",
+          "title": "Solution"
+        },
+        "evaluation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Evaluation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Evaluation results from benchmarking (None for workload-only traces)."
+        }
+      },
+      "required": [
+        "definition",
+        "workload"
+      ],
+      "title": "Trace",
+      "type": "object"
+    },
+    "Solution": {
+      "$defs": {
+        "BuildSpec": {
+          "description": "Build specification for a solution implementation.\n\nContains all technical specifications required to build and execute a solution, including\nlanguage, hardware targets, dependencies, entry point, and build commands.",
+          "properties": {
+            "language": {
+              "$ref": "#/$defs/SupportedLanguages",
+              "description": "The primary programming language (e.g., 'triton', 'cuda', 'python')."
+            },
+            "target_hardware": {
+              "description": "List of hardware this solution is compatible with. E.g. 'cpu', 'cuda'. Note this is not used\nin verification and building now.",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "title": "Target Hardware",
+              "type": "array"
+            },
+            "entry_point": {
+              "description": "The exact path to the function to be called. Format: '{file_path}::{function_name}'\n(e.g., 'main.py::run').",
+              "minLength": 1,
+              "title": "Entry Point",
+              "type": "string"
+            },
+            "dependencies": {
+              "description": "Optional list of required libraries or packages. E.g. for CUDA, we support 'cublas',\n'cudnn', 'cutlass'",
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "title": "Dependencies",
+              "type": "array"
+            },
+            "destination_passing_style": {
+              "default": true,
+              "description": "Whether to use destination passing style for the solution. If True, the solution should\naccept the output tensors as the last arguments. If False, the solution should return the\noutput tensors.",
+              "title": "Destination Passing Style",
+              "type": "boolean"
+            },
+            "binding": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/SupportedBindings"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "The binding type to use for C++/CUDA solutions. If None, defaults to 'tvm-ffi' for\nC++/CUDA languages. Ignored for Python and Triton languages."
+            }
+          },
+          "required": [
+            "language",
+            "target_hardware",
+            "entry_point"
+          ],
+          "title": "BuildSpec",
+          "type": "object"
+        },
+        "SourceFile": {
+          "description": "A single source code file in a solution implementation.\n\nRepresents a source code file with its relative path and complete content.\nThe file content is validated for syntax correctness based on the file extension.",
+          "properties": {
+            "path": {
+              "description": "The relative path of the file, including its name and extension (e.g., 'src/kernel.cu',\n'main.py'). When compiling the solution, a temporary solution source directory will be\ncreated, and the file will be placed according to this path. The path should not contain\nparent directory traversal (\"..\").",
+              "minLength": 1,
+              "title": "Path",
+              "type": "string"
+            },
+            "content": {
+              "description": "The complete text content of the source file.",
+              "minLength": 1,
+              "title": "Content",
+              "type": "string"
+            }
+          },
+          "required": [
+            "path",
+            "content"
+          ],
+          "title": "SourceFile",
+          "type": "object"
+        },
+        "SupportedBindings": {
+          "description": "Supported bindings for C++/CUDA solution implementations.\n\nEnumeration of binding types that can be used to interface compiled\nC++/CUDA code with Python.",
+          "enum": [
+            "tvm-ffi",
+            "torch"
+          ],
+          "title": "SupportedBindings",
+          "type": "string"
+        },
+        "SupportedLanguages": {
+          "description": "Supported programming languages for solution implementations.\n\nEnumeration of programming languages that can be used to implement\nsolutions for computational workloads.",
+          "enum": [
+            "python",
+            "triton",
+            "cpp",
+            "cuda",
+            "tilelang"
+          ],
+          "title": "SupportedLanguages",
+          "type": "string"
+        }
+      },
+      "description": "A concrete implementation for a given Definition.\n\nRepresents a complete solution that provides a high-performance implementation\nfor a computational workload defined by a Definition. Contains all source code,\nbuild specifications, and metadata required for building, interfacing, and\nbenchmarking the implementation.",
+      "properties": {
+        "name": {
+          "description": "A unique, human-readable name for this specific solution (e.g., 'rmsnorm_triton_v1_h100').",
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "definition": {
+          "description": "The name of the Definition this implementation solves.",
+          "minLength": 1,
+          "title": "Definition",
+          "type": "string"
+        },
+        "author": {
+          "description": "The name of the author or agent system that created this solution.",
+          "minLength": 1,
+          "title": "Author",
+          "type": "string"
+        },
+        "spec": {
+          "$ref": "#/$defs/BuildSpec",
+          "description": "Technical specifications for building and executing this solution."
+        },
+        "sources": {
+          "description": "Array of source code files representing the complete implementation.",
+          "items": {
+            "$ref": "#/$defs/SourceFile"
+          },
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional human-readable description of the solution's technique or approach.",
+          "title": "Description"
+        }
+      },
+      "required": [
+        "name",
+        "definition",
+        "author",
+        "spec",
+        "sources"
+      ],
+      "title": "Solution",
+      "type": "object"
+    },
+    "BenchmarkConfig": {
+      "$defs": {
+        "EvalConfig": {
+          "description": "Per-definition eval parameters. All fields Optional; None means inherit from parent layer.",
+          "properties": {
+            "warmup_runs": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Warmup Runs"
+            },
+            "iterations": {
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Iterations"
+            },
+            "num_trials": {
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Num Trials"
+            },
+            "rtol": {
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Rtol"
+            },
+            "atol": {
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Atol"
+            },
+            "required_matched_ratio": {
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0,
+                  "maximum": 1,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Required Matched Ratio"
+            },
+            "extra": {
+              "additionalProperties": true,
+              "title": "Extra",
+              "type": "object"
+            }
+          },
+          "title": "EvalConfig",
+          "type": "object"
+        }
+      },
+      "description": "Configuration for benchmark runs. Mirrors the YAML structure exactly.\n\nAll fields have default values to make configuration optional.",
+      "properties": {
+        "use_isolated_runner": {
+          "default": false,
+          "title": "Use Isolated Runner",
+          "type": "boolean"
+        },
+        "definitions": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Definitions"
+        },
+        "solutions": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Solutions"
+        },
+        "timeout_seconds": {
+          "default": 300,
+          "exclusiveMinimum": 0,
+          "title": "Timeout Seconds",
+          "type": "integer"
+        },
+        "profile_baseline": {
+          "default": true,
+          "title": "Profile Baseline",
+          "type": "boolean"
+        },
+        "log_dir": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Log Dir"
+        },
+        "warmup_runs": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Warmup Runs"
+        },
+        "iterations": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Iterations"
+        },
+        "num_trials": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Num Trials"
+        },
+        "rtol": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rtol"
+        },
+        "atol": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Atol"
+        },
+        "required_matched_ratio": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Required Matched Ratio"
+        },
+        "sampling_validation_trials": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sampling Validation Trials"
+        },
+        "sampling_tvd_threshold": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sampling Tvd Threshold"
+        },
+        "op_type_config": {
+          "additionalProperties": {
+            "$ref": "#/$defs/EvalConfig"
+          },
+          "title": "Op Type Config",
+          "type": "object"
+        },
+        "definition_config": {
+          "additionalProperties": {
+            "$ref": "#/$defs/EvalConfig"
+          },
+          "title": "Definition Config",
+          "type": "object"
+        }
+      },
+      "title": "BenchmarkConfig",
+      "type": "object"
+    }
+  }
+}
